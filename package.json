@@ -1,0 +1,20 @@
+{
+  "name": "tp-github-action",
+  "version": "1.0.0",
+  "description": "My first github action.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build src/action.js -o dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/miask-org/tp-github-action.git"
+  },
+  "author": "Muzammal Nazir",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/miask-org/tp-github-action/issues"
+  },
+  "homepage": "https://github.com/miask-org/tp-github-action#readme"
+}
