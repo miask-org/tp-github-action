@@ -5892,24 +5892,29 @@ function wrappy (fn, cb) {
 /***/ 348:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
 
+  
 const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 
-async function run() {
+async function run(){
+    const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
+    
+    const octokit = github.getOctokit(GITHUB_TOKEN);
 
-	const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
+    const { context = {} } = github;
+    const { pull_request } = context.payload;
 
-	const { context = {} } = github;
-	const { pull_request } = context.payload;
-  	
-  	await octokit.issues.createComment({
-	  ...context.repo,
-	  issue_number: pull_request.number,
-	  body: 'Thank you for submitting a pull request! We will try to review this as soon as we can.'
-	});
+    await octokit.issues.createComment({
+        ... context.repo,
+        issue_number: pull_request.number,
+        body: `Thank you submitting a pull request! We will try to review as soon as we can`,
+      });
+      Parameters
+
 }
 
 run();
+
 
 /***/ }),
 
