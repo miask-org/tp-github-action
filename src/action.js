@@ -1,4 +1,4 @@
-  
+
 const core = require('@actions/core');
 const github = require('@actions/github');
 
@@ -13,9 +13,8 @@ async function run(){
     await octokit.issues.createComment({
         ... context.repo,
         issue_number: pull_request.number,
-        body: `Thank you submitting a pull request! We will try to review as soon as we can`,
+        body: 'Thank you submitting a pull request! We will try to review as soon as we can',
       });
-      Parameters
 
 }
 
