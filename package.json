@@ -16,5 +16,10 @@
   "bugs": {
     "url": "https://github.com/miask-org/tp-github-action/issues"
   },
-  "homepage": "https://github.com/miask-org/tp-github-action#readme"
+  "homepage": "https://github.com/miask-org/tp-github-action#readme",
+  "devDependencies": {
+    "@actions/core": "^1.2.6",
+    "@actions/github": "^4.0.0",
+    "@vercel/ncc": "^0.28.0"
+  }
 }
