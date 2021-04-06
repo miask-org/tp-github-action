@@ -16,6 +16,8 @@ async function run(){
         body: 'Thank you submitting a pull request! We will try to review as soon as we can',
       });
 
+    console.log(pull_request.title);
+
 }
 
 run();
