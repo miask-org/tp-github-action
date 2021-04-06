@@ -17,6 +17,7 @@ async function run(){
       });
 
     console.log(pull_request.title);
+    console.log(pull_request.body);
 
 }
 
