@@ -5913,6 +5913,13 @@ async function run(){
     console.log(pull_request.title);
     console.log(pull_request.body);
 
+    console.log(context.repo);
+    //await octokit.request('GET /repos/{owner}/{repo}/releases/{release_id}', {
+    //  owner: 'octocat',
+    //  repo: 'hello-world',
+    //  release_id: 42
+    //})
+
 }
 
 run();
