@@ -13,17 +13,24 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
 
-        const ex = exec('pwd');
-        console.log(ex);
+        //const ex = exec('pwd');
+        //console.log(ex);
 
         if (tag_name != null || tag_name != '') {
 
-            const { status } = await octokit.repos.getReleaseByTag({
+            await octokit.repos.getReleaseByTag({
               ...context.repo,
               tag: tag_name,
+            }).then(function(response) {
+                //on Success
+                console.log("response: ", response);
+
+            }, function(response){
+                //On failure
+                console.log("response: ", response);
             });
 
-            console.log("status: ", status);
+            /*console.log("status: ", status);
 
             if (status != 200 ) {
 
@@ -34,7 +41,7 @@ async function run(){
                   draft: false,
                   prerelease: true
                 });
-            }
+            }*/
         }
 
     } catch (error) {
