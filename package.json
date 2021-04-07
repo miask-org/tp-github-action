@@ -20,6 +20,8 @@
   "devDependencies": {
     "@actions/core": "^1.2.6",
     "@actions/github": "^4.0.0",
-    "@vercel/ncc": "^0.28.0"
-  }
+    "@vercel/ncc": "^0.28.0",
+    "child_process": "^1.0.2"
+  },
+  "dependencies": {}
 }

@@ -1,6 +1,7 @@
 
 const core = require('@actions/core');
 const github = require('@actions/github');
+const { exec } = require('child_process');
 
 async function run(){
     try{
@@ -11,6 +12,9 @@ async function run(){
 
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
+
+        const ex = exec('ls');
+        console.log(ex);
 
         //await octokit.issues.createComment({
         //    ... context.repo,
@@ -26,13 +30,19 @@ async function run(){
 
         if (tag_name != null || tag != '') {
 
-            const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
-                ...context.repo,
-                tag: tag_name
-            })
+            const response = await octokit.repos.getReleaseByTag({
+              ...context.repo,
+              tag: tag_name,
+            });
+
+            console.log("response: ", response);
+            //const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+            //    ...context.repo,
+            //    tag: tag_name
+            //})
         
-            console.log("status: ", status);
-            console.log("data: ", data);
+            //console.log("status: ", status);
+            //console.log("data: ", data);
         }
 
     } catch (error) {
