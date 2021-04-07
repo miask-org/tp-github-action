@@ -5917,7 +5917,7 @@ async function run(){
     console.log("payload: %j", context.payload)
 
     try{
-        const { status, headers, data } = await octokit.request('GET /repos/{repo}/releases/tag/v2', {
+        const { status, headers, data } = await octokit.request('GET /repos/miask-org/tp-github-action/releases/tag/v2', {
             repo: repository.full_name
         })
 
