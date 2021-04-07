@@ -30,7 +30,7 @@ async function run(){
 
             }, (failure) => {
                 
-                console.log("Creating new release...");
+                console.log("Building the project...");
 
                 exec('mvn -B package --file pom.xml', (error, stdout, stderr) => {
 
@@ -42,6 +42,7 @@ async function run(){
                     console.log(`stdout: ${stdout}`);
                     console.error(`stderr: ${stderr}`);
 
+                    console.log("creating new release...");
                     octokit.repos.createRelease({
                         //Params
                         ...context.repo,
