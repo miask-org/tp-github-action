@@ -7081,22 +7081,29 @@ function wrappy (fn, cb) {
 
 const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
-const exec = __nccwpck_require__(514);
+const exe = __nccwpck_require__(514);
+const { exec } = __nccwpck_require__(129);
 
 async function run(){
     try{
-        const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
+        /*const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
         const tag_name = core.getInput('tag_name');
 
         const octokit = github.getOctokit(GITHUB_TOKEN);
 
         const { context = {} } = github;
-        const { pull_request, repository } = context.payload;
+        const { pull_request, repository } = context.payload;*/
 
-        const ex = exec('pwd');
-        console.log(ex);
+        exec('pwd', (error, stdout, stderr) => {
+          if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+          }
+          console.log(`stdout: ${stdout}`);
+          console.error(`stderr: ${stderr}`);
+        });
 
-        if (tag_name != null || tag_name != '') {
+        /*if (tag_name != null || tag_name != '') {
 
             await octokit.repos.getReleaseByTag({
                 //Params
@@ -7130,7 +7137,7 @@ async function run(){
                     console.log("create repo error: ",  err);
                 });
             });
-        }
+        }*/
 
     } catch (error) {
 
