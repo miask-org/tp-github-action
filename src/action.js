@@ -8,26 +8,29 @@ async function run(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
 
     const { context = {} } = github;
-    const { pull_request } = context.payload;
+    const { pull_request, repository } = context.payload;
 
-    await octokit.issues.createComment({
-        ... context.repo,
-        issue_number: pull_request.number,
-        body: 'Thank you submitting a pull request! We will try to review as soon as we can',
-      });
+    //await octokit.issues.createComment({
+    //    ... context.repo,
+    //    issue_number: pull_request.number,
+    //    body: 'Thank you submitting a pull request! We will try to review as soon as we can',
+    //  });
 
-    console.log(pull_request.title);
-    console.log(pull_request.body);
-    console.log(pull_request.number);
-    
+    //console.log(pull_request.title);
+    //console.log(pull_request.body);
+    //console.log(pull_request.number);
+
     console.log("payload: %j", context.payload)
 
-    //await octokit.request('GET /repos/{owner}/{repo}/releases/{release_id}', {
-    //  owner: 'octocat',
-    //  repo: 'hello-world',
-    //  release_id: 42
-    //})
+    const { status, headers, data } = await octokit.request('GET /repos/{repo}/releases/tag/v2', {
+      repo: repository.full_name
+    })
 
+    console.log("status: ", status);
+    console.log("headers: ", headers);
+    console.log("data: ", data);
+    
+    console.log("Action end");
 }
 
 run();
