@@ -7094,7 +7094,7 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;*/
 
-        exec('pwd', (error, stdout, stderr) => {
+        exec('mvn -B package --file pom.xml', (error, stdout, stderr) => {
           if (error) {
             console.error(`exec error: ${error}`);
             return;
