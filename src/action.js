@@ -1,7 +1,7 @@
 
 const core = require('@actions/core');
 const github = require('@actions/github');
-const { exec } = require('child_process');
+const exec = require('@actions/exec');
 
 async function run(){
     try{
@@ -13,8 +13,8 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
 
-        //const ex = exec('pwd');
-        //console.log(ex);
+        const ex = exec('pwd');
+        console.log(ex);
 
         if (tag_name != null || tag_name != '') {
 
@@ -33,7 +33,7 @@ async function run(){
                 //On failure
                 console.log("On failure");
 
-                const resp = octokit.repos.createRelease({
+                octokit.repos.createRelease({
                     //Params
                     ...context.repo,
                     tag_name: tag_name,
@@ -41,16 +41,14 @@ async function run(){
                     draft: false,
                     prerelease: true
 
-                });
-
-                console.log(resp); /*.then(function(response){
+                }).then(function(res){
                     //on Success
-                    console.log("create repo response: "response);
+                    console.log("create repo response: ", res);
 
-                },function(error){
+                },function(err){
                     //on failure
-                    console.log("create repo error": error);
-                });*/
+                    console.log("create repo error: ",  err);
+                });
             });
         }
 
