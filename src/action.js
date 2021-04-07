@@ -16,7 +16,7 @@ async function run(){
 
         if (tag_name != null || tag_name != '') {
 
-            await octokit.repos.getReleaseByTag({
+            octokit.repos.getReleaseByTag({
                 //Params
                 ...context.repo,
                  tag: tag_name,
@@ -45,7 +45,7 @@ async function run(){
                 console.error(`stderr: ${stderr}`);
             });
 
-            await octokit.repos.createRelease({
+            octokit.repos.createRelease({
                 //Params
                 ...context.repo,
                 tag_name: tag_name,
