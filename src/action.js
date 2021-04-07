@@ -22,10 +22,10 @@ async function run(){
         //console.log(pull_request.number);
 
         //console.log("payload: %j", context.payload)
-        console.log(repository.full_name);
-        
-        const { status, data } = await octokit.request('GET /repos/{repo}/releases/tags/v2', {
-            repo: repository.full_name
+
+        const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/v2', {
+            owner: repository.owner.login,
+            repo: repository.name
         })
 
         console.log("status: ", status);
