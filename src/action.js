@@ -19,34 +19,44 @@ async function run(){
         if (tag_name != null || tag_name != '') {
 
             await octokit.repos.getReleaseByTag({
-              ...context.repo,
-              tag: tag_name,
+                //Params
+                ...context.repo,
+                 tag: tag_name,
+
             }).then(function(response) {
                 //on Success
-                console.log("response: ", response);
+                if (response.status == 200) {
+                    console.log("Release already exists");
+                }
 
-            }, function(response){
+            }, function(error){
                 //On failure
-                console.log("response: ", response);
-            });
+                console.log("On failure");
 
-            /*console.log("status: ", status);
+                const resp = octokit.repos.createRelease({
+                    //Params
+                    ...context.repo,
+                    tag_name: tag_name,
+                    name: tag_name,
+                    draft: false,
+                    prerelease: true
 
-            if (status != 200 ) {
-
-                const { status } = await octokit.repos.createRelease({
-                  ...context.repo,
-                  tag_name: tag_name,
-                  name: tag_name,
-                  draft: false,
-                  prerelease: true
                 });
-            }*/
+
+                console.log(resp); /*.then(function(response){
+                    //on Success
+                    console.log("create repo response: "response);
+
+                },function(error){
+                    //on failure
+                    console.log("create repo error": error);
+                });*/
+            });
         }
 
     } catch (error) {
 
-        console.log("error: ", error);
+        console.log("catch error: ", error);
     }
 
     console.log("Action end");
