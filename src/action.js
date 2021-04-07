@@ -53,10 +53,10 @@ async function run(){
 
                     }).then( (success) => {
 
-                        console.log("create release success: ", success);
+                        console.log("Release created.");
 
 
-                        exec('d target/ && ls *.jar | head -1', (error, stdout, stderr) => {
+                        exec('cd target/ && ls *.jar | head -1', (error, stdout, stderr) => {
 
                             if (error) {
                                 console.error(`exec error: ${error}`);
@@ -71,7 +71,7 @@ async function run(){
 
                     }, (failure) => {
 
-                        console.log("create release failure: ",  failure);
+                        console.log("Release failed. ");
                         return;
                     });
                 });
