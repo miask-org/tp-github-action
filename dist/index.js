@@ -5916,14 +5916,20 @@ async function run(){
 
     console.log("payload: %j", context.payload)
 
-    const { status, headers, data } = await octokit.request('GET /repos/{repo}/releases/tag/v2', {
-      repo: repository.full_name
-    })
+    try{
+        const { status, headers, data } = await octokit.request('GET /repos/{repo}/releases/tag/v2', {
+            repo: repository.full_name
+        })
 
-    console.log("status: ", status);
-    console.log("headers: ", headers);
-    console.log("data: ", data);
-    
+        console.log("status: ", status);
+        console.log("headers: ", headers);
+        console.log("data: ", data);
+
+    } catch (error) {
+
+        console.log("error: ", error);
+    }
+
     console.log("Action end");
 }
 
