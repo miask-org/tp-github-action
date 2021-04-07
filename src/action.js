@@ -5,7 +5,8 @@ const github = require('@actions/github');
 async function run(){
     try{
         const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
-        
+        const tag_name = core.getInput('tag_name');
+
         const octokit = github.getOctokit(GITHUB_TOKEN);
 
         const { context = {} } = github;
@@ -22,14 +23,17 @@ async function run(){
         //console.log(pull_request.number);
 
         //console.log("payload: %j", context.payload)
+        if (tag_name != null || tag != '') {
 
-        const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/v2', {
-            owner: repository.owner.login,
-            repo: repository.name
-        })
-
-        console.log("status: ", status);
-        console.log("data: ", data);
+            const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
+                owner: repository.owner.login,
+                repo: repository.name,
+                tag: tag_name
+            })
+        
+            console.log("status: ", status);
+            console.log("data: ", data);
+        }
 
     } catch (error) {
 

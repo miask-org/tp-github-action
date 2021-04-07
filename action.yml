@@ -9,6 +9,9 @@ inputs:
   TENOR_TOKEN:
     description: 'Tenor API token'
     required: true
+  tag_name:
+    description: 'Release tag name'
+    required: false
 
 runs:
   using: 'node12'
