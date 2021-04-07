@@ -7090,7 +7090,7 @@ async function run(){
         const tag_name = core.getInput('tag_name');
 
         const octokit = github.getOctokit(GITHUB_TOKEN);
-
+        const artifactName = '';
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
 
@@ -7112,50 +7112,51 @@ async function run(){
                 
                 console.log("Creating new release...");
 
+                exec('mvn -B package --file pom.xml', (error, stdout, stderr) => {
+
+                    if (error) {
+                        console.error(`exec error: ${error}`);
+                        //exec('exit 1');
+                        return;
+                    }
+                    console.log(`stdout: ${stdout}`);
+                    console.error(`stderr: ${stderr}`);
+
+                    octokit.repos.createRelease({
+                        //Params
+                        ...context.repo,
+                        tag_name: tag_name,
+                        name: tag_name,
+                        draft: false,
+                        prerelease: true
+
+                    }).then( (success) => {
+
+                        console.log("create release success: ", success);
+
+
+                        exec('d target/ && ls *.jar | head -1', (error, stdout, stderr) => {
+
+                            if (error) {
+                                console.error(`exec error: ${error}`);
+                                //exec('exit 1');
+                                return;
+                            }
+                            console.log(`stdout: ${stdout}`);
+                            console.error(`stderr: ${stderr}`);
+                            artifactName = stdout;
+
+                        });
+
+                    }, (failure) => {
+
+                        console.log("create release failure: ",  failure);
+                        return;
+                    });
+                });
+
             });
-
-            exec('mvn -B package --file pom.xml', (error, stdout, stderr) => {
-
-                if (error) {
-                    console.error(`exec error: ${error}`);
-                    //exec('exit 1');
-                    return;
-                }
-                console.log(`stdout: ${stdout}`);
-                console.error(`stderr: ${stderr}`);
-            });
-
-            octokit.repos.createRelease({
-                //Params
-                ...context.repo,
-                tag_name: tag_name,
-                name: tag_name,
-                draft: false,
-                prerelease: true
-
-            }).then( (success) => {
-
-                console.log("create release success: ", success);
-
-            }, (failure) => {
-
-                console.log("create release failure: ",  failure);
-                return;
-            });
-
-            const artifactName = '';
-            exec('d target/ && ls *.jar | head -1', (error, stdout, stderr) => {
-
-                if (error) {
-                    console.error(`exec error: ${error}`);
-                    //exec('exit 1');
-                    return;
-                }
-                console.log(`stdout: ${stdout}`);
-                console.error(`stderr: ${stderr}`);
-                artifactName = stdout;
-
-            });
+         
             //- name: GEt jar file in an env variable.
             //run: echo "artifactName=$(cd target/ && ls *.jar | head -1)"  >> $GITHUB_ENV
         }
