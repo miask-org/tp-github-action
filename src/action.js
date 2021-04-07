@@ -13,36 +13,28 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
 
-        const ex = exec('ls');
+        const ex = exec('pwd');
         console.log(ex);
 
-        //await octokit.issues.createComment({
-        //    ... context.repo,
-        //    issue_number: pull_request.number,
-        //    body: 'Thank you submitting a pull request! We will try to review as soon as we can',
-        //  });
+        if (tag_name != null || tag_name != '') {
 
-        //console.log(pull_request.title);
-        //console.log(pull_request.body);
-        //console.log(pull_request.number);
-
-        //console.log("payload: %j", context.payload)
-
-        if (tag_name != null || tag != '') {
-
-            const response = await octokit.repos.getReleaseByTag({
+            const { status } = await octokit.repos.getReleaseByTag({
               ...context.repo,
               tag: tag_name,
             });
 
-            console.log("response: ", response);
-            //const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
-            //    ...context.repo,
-            //    tag: tag_name
-            //})
-        
-            //console.log("status: ", status);
-            //console.log("data: ", data);
+            console.log("status: ", status);
+
+            if (status != 200 ) {
+
+                const { status } = await octokit.repos.createRelease({
+                  ...context.repo,
+                  tag_name: tag_name,
+                  name: tag_name,
+                  draft: false,
+                  prerelease: true
+                });
+            }
         }
 
     } catch (error) {
