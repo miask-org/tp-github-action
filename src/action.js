@@ -18,8 +18,10 @@ async function run(){
 
     console.log(pull_request.title);
     console.log(pull_request.body);
+    console.log(pull_request.number);
+    
+    console.log("payload: %j", context.payload)
 
-    console.log(context.payload);
     //await octokit.request('GET /repos/{owner}/{repo}/releases/{release_id}', {
     //  owner: 'octocat',
     //  repo: 'hello-world',
