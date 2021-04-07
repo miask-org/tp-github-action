@@ -23,7 +23,7 @@ async function run(){
         //console.log(pull_request.number);
 
         //console.log("payload: %j", context.payload)
-        console.log(context.repo);
+        console.log(...context.repo);
 
         if (tag_name != null || tag != '') {
 
