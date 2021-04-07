@@ -5917,6 +5917,8 @@ async function run(){
         //console.log(pull_request.number);
 
         //console.log("payload: %j", context.payload)
+        console.log(context.repo);
+
         if (tag_name != null || tag != '') {
 
             const { status, data } = await octokit.request('GET /repos/{owner}/{repo}/releases/tags/{tag}', {
