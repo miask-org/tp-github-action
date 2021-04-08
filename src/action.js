@@ -157,7 +157,7 @@ async function run(){
                         if (uploadAssetResp && client_id && client_secret && env) {
 
                             const splits = app_name.split("-");
-                            const app = "my-${splits[1]}-sandbox-api";
+                            const app = "my-" + splits[1] + "-sandbox-api";
 
                             const uploadToAnypoint = await uploadJarToAnypoint(client_id, client_secret, env, app, artifactName);
                         }
