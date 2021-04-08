@@ -7078,7 +7078,6 @@ function wrappy (fn, cb) {
 /***/ 348:
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __nccwpck_require__) => {
 
-
 const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 const exe = __nccwpck_require__(514);
@@ -7152,9 +7151,10 @@ async function createRelease(octokit, context, tag_name, draft, prerelease) {
 async function getArtifactName() {
 
     try {
-        const artifactName = await exec('cd target/ && ls *.jar | head -1');
-        console.log('artifact log', artifactName.stdout)
-        return artifactName.stdout.replace(/\r?\n|\r/g, "");
+        var artifactName = await exec('cd target/ && ls *.jar | head -1');
+        artifactName = artifactName.stdout.replace(/\r?\n|\r/g, "");
+        console.log('artifact name: ', artifactName)
+        return artifactName;
     }
     catch (error) {
 
@@ -7166,9 +7166,6 @@ async function getArtifactName() {
 async function uploadReleaseAsset(octokit, context, release, artifactName) {
 
     try{
-        console.log('Release_Id: ', release.id);
-        console.log('Upload URL: ', release.upload_url);
-        console.log('Artifact Name: ', artifactName);
         const upload = await octokit.repos.uploadReleaseAsset({
             //Params
             ...context.repo,
@@ -7188,10 +7185,30 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
     }
 }
 
+async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact) {
+
+    try {
+
+        const exe = await exec("anypoint-cli --client_id=${client_id} --client_secret=${client_secret} --environment=${env} runtime-mgr cloudhub-application modify ${app} target/${artifact}");
+        console.log('Upload jar log: ', exe);
+        return true;
+    }
+    catch(error) {
+
+        console.log('Upload jar error: ', error);
+        return false;
+    }
+}
+
 async function run(){
 
         const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
         const tag_name = core.getInput('tag_name');
+        const app_name = core.getInput('app_name');
+        const client_id = core.getInput('client_id');
+        const client_secret = core.getInput('client_secret');
+        const env = core.getInput('env');
+
 
         const octokit = github.getOctokit(GITHUB_TOKEN);
         const { context = {} } = github;
@@ -7214,6 +7231,14 @@ async function run(){
                     if (artifactName) {
 
                         const uploadAssetResp = await uploadReleaseAsset(octokit, context, release, artifactName);
+
+                        if (uploadAssetResp && client_id && client_secret && env) {
+
+                            const splits = app_name.split("-");
+                            const app = "my-${splits[1]}-sandbox-api";
+
+                            const uploadToAnypoint = await uploadJarToAnypoint(client_id, client_secret, env, app, artifactName);
+                        }
                     }
                 }
             }
