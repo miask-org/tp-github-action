@@ -7116,12 +7116,12 @@ async function buildPackage() {
 
     try {
         const build = await exec('mvn -B package --file pom.xml');
-        console.log('build log', build)
+        console.log('build log', build.stdout)
         return true;
     }
     catch(error) {
 
-        console.log('error log: ', error);
+        console.log('error log: ', error.stderr);
         return false;
     }
 }
@@ -7130,7 +7130,7 @@ async function createRelease(octokit, context, tag_name, draft, prerelease) {
 
     try {
 
-        const response = octokit.repos.createRelease({
+        const response = await octokit.repos.createRelease({
             //Params
             ...context.repo,
             tag_name: tag_name,
@@ -7139,7 +7139,7 @@ async function createRelease(octokit, context, tag_name, draft, prerelease) {
             prerelease: prerelease
         });
 
-        console.log('Release created.');
+        console.log('Release created. resp: ', response);
         return response;
     }
     catch(error) {
@@ -7153,12 +7153,12 @@ async function getArtifactName() {
 
     try {
         const artifactName = await exec('cd target/ && ls *.jar | head -1');
-        console.log('artifact log', artifactName)
-        return artifactName;
+        console.log('artifact log', artifactName.stdout)
+        return artifactName.stdout.replace("/\r?\n|\r/g", "");
     }
     catch (error) {
 
-        console.log('error log: ', error);
+        console.log('error log: ', error.stderr);
         return null;
     }
 }
@@ -7172,7 +7172,7 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
             release_id: release.id,
             origin: release.upload_url,
             name: artifactName,
-            data: fs.readFileSync('target/${artifactName}')
+            data: fs.readFileSync('target/' + artifactName)
         });
 
         console.log('Release upload response', upload)
