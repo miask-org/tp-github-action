@@ -95,7 +95,7 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
             data: fs.readFileSync('target/' + artifactName)
         });
 
-        console.log('Release upload response', upload)
+        console.log('Release upload response')
         return true;
     }
     catch(error) {
@@ -108,8 +108,10 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
 async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact) {
 
     try {
-
-        const exe = await exec("anypoint-cli --client_id=${client_id} --client_secret=${client_secret} --environment=${env} runtime-mgr cloudhub-application modify ${app} target/${artifact}");
+        const install = await exec("npm install -g anypoint-cli@3.4.3");
+        const cmd = "anypoint-cli --client_id=${client_id} --client_secret=${client_secret} --environment=${env} runtime-mgr cloudhub-application modify ${app} target/${artifact}";
+        console.log("cmd: ", cmd);
+        const exe = await exec(cmd);
         console.log('Upload jar log: ', exe);
         return true;
     }
