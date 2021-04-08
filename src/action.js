@@ -43,9 +43,9 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
             
-        const releaseExists = await releaseExists(tag_name);
+        const releaseExist = await releaseExists(tag_name);
 
-        if (!releaseExists) {
+        if (!releaseExist) {
 
             const build = await exec('mvn -B package --file pom.xml');
 
