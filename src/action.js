@@ -6,7 +6,7 @@ const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
 
-async function releaseExists(tag_name) {
+async function releaseExists(octokit, context, tag_name) {
 
     if (tag_name != null || tag_name != '') {
 
@@ -18,7 +18,6 @@ async function releaseExists(tag_name) {
             });
 
             console.log('Release already exists.');
-            return true;
 
         } catch(err) {
 
@@ -27,7 +26,6 @@ async function releaseExists(tag_name) {
                 return false;
             } else {
                 console.log('Error while fetching release. Error: ', err);
-                return true;
             }
         }
     }
@@ -43,7 +41,7 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
             
-        const releaseExist = await releaseExists(tag_name);
+        const releaseExist = await releaseExists(octokit, context, tag_name );
 
         if (!releaseExist) {
 

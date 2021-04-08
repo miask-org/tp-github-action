@@ -7086,7 +7086,7 @@ const util = __nccwpck_require__(669);
 const exec = util.promisify(__nccwpck_require__(129).exec);
 const fs = __nccwpck_require__(747);
 
-async function releaseExists(tag_name) {
+async function releaseExists(octokit, context, tag_name) {
 
     if (tag_name != null || tag_name != '') {
 
@@ -7098,7 +7098,6 @@ async function releaseExists(tag_name) {
             });
 
             console.log('Release already exists.');
-            return true;
 
         } catch(err) {
 
@@ -7107,7 +7106,6 @@ async function releaseExists(tag_name) {
                 return false;
             } else {
                 console.log('Error while fetching release. Error: ', err);
-                return true;
             }
         }
     }
@@ -7123,7 +7121,7 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
             
-        const releaseExist = await releaseExists(tag_name);
+        const releaseExist = await releaseExists(octokit, context, tag_name );
 
         if (!releaseExist) {
 
