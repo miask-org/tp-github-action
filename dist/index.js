@@ -7082,8 +7082,37 @@ function wrappy (fn, cb) {
 const core = __nccwpck_require__(186);
 const github = __nccwpck_require__(438);
 const exe = __nccwpck_require__(514);
-const { exec } = __nccwpck_require__(129);
+const util = __nccwpck_require__(669);
+const exec = util.promisify(__nccwpck_require__(129).exec);
 const fs = __nccwpck_require__(747);
+
+async function releaseExists(tag_name) {
+
+    if (tag_name != null || tag_name != '') {
+
+        try {
+            const response = await octokit.repos.getReleaseByTag({
+                //Params
+                ...context.repo,
+                tag: tag_name,
+            });
+
+            console.log('Release already exists.');
+            return true;
+
+        } catch(err) {
+
+            if (err.status == 404 ) {
+                console.log('Release not found.');
+                return false;
+            } else {
+                onsole.log('Error while fetching release. Error: ', err);
+                return true;
+            }
+        }
+    }
+    return true;
+}
 
 async function run(){
 
@@ -7093,24 +7122,15 @@ async function run(){
         const octokit = github.getOctokit(GITHUB_TOKEN);
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
-
-        if (tag_name != null || tag_name != '') {
-
-            try {
-                const response = await octokit.repos.getReleaseByTag({
-                    //Params
-                    ...context.repo,
-                    tag: tag_name,
-                });
-
-                console.log('release response: ', response);
-                
-            } catch(err) {
-                console.log('release error: ', err);
-                return;
-            }
-        }
             
+        const releaseExists = await releaseExists(tag_name);
+
+        if (!releaseExists) {
+
+            const build = await exec('mvn -B package --file pom.xml');
+
+            console.log('build log: ', build);
+        }
             /*.then( (success) => {
                 
                 if (success.status == 200) {
@@ -7186,6 +7206,7 @@ async function run(){
 }
 
 run();
+
 
 
 /***/ }),
