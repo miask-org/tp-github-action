@@ -7139,8 +7139,8 @@ async function createRelease(octokit, context, tag_name, draft, prerelease) {
             prerelease: prerelease
         });
 
-        console.log('Release created. resp: ', response);
-        return response;
+        console.log('Release created.');
+        return response.data;
     }
     catch(error) {
 
@@ -7154,7 +7154,7 @@ async function getArtifactName() {
     try {
         const artifactName = await exec('cd target/ && ls *.jar | head -1');
         console.log('artifact log', artifactName.stdout)
-        return artifactName.stdout.replace("/\r?\n|\r/g", "");
+        return artifactName.stdout.replace(/\r?\n|\r/g, "");
     }
     catch (error) {
 
@@ -7166,6 +7166,9 @@ async function getArtifactName() {
 async function uploadReleaseAsset(octokit, context, release, artifactName) {
 
     try{
+        console.log('Release_Id: ', release.id);
+        console.log('Upload URL: ', release.upload_url);
+        console.log('Artifact Name: ', artifactName);
         const upload = await octokit.repos.uploadReleaseAsset({
             //Params
             ...context.repo,
