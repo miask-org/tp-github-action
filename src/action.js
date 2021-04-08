@@ -109,7 +109,7 @@ async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact)
 
     try {
         const install = await exec("npm install -g anypoint-cli@3.4.3");
-        const cmd = "anypoint-cli --client_id=${client_id} --client_secret=${client_secret} --environment=${env} runtime-mgr cloudhub-application modify ${app} target/${artifact}";
+        const cmd = "anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + env + " runtime-mgr cloudhub-application modify " + app + " target/" + artifact;
         console.log("cmd: ", cmd);
         const exe = await exec(cmd);
         console.log('Upload jar log: ', exe);
