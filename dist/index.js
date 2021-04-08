@@ -7106,7 +7106,7 @@ async function releaseExists(tag_name) {
                 console.log('Release not found.');
                 return false;
             } else {
-                onsole.log('Error while fetching release. Error: ', err);
+                console.log('Error while fetching release. Error: ', err);
                 return true;
             }
         }
