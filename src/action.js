@@ -21,7 +21,7 @@ async function releaseExists(octokit, context, tag_name) {
 
         } catch(error) {
 
-            if (err.status == 404 ) {
+            if (error.status == 404 ) {
                 console.log('Release not found.');
                 return false;
             } else {
@@ -73,7 +73,7 @@ async function getArtifactName() {
 
     try {
         const artifactName = await exec('cd target/ && ls *.jar | head -1');
-        console.log('artifact log', build)
+        console.log('artifact log', artifactName)
         return artifactName;
     }
     catch (error) {
