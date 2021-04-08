@@ -23,13 +23,14 @@ async function run(){
                     tag: tag_name,
                 });
 
-
+                console.log('release response: ', response);
+                
             } catch(err) {
                 console.log('release error: ', err);
                 return;
             }
         }
-            console.log('release response: ', response)
+            
             /*.then( (success) => {
                 
                 if (success.status == 200) {
