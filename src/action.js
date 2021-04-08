@@ -11,7 +11,7 @@ async function releaseExists(octokit, context, tag_name) {
     if (tag_name != null || tag_name != '') {
 
         try {
-            const response = await octokit.repos.getReleaseByTag({
+            await octokit.repos.getReleaseByTag({
                 //Params
                 ...context.repo,
                 tag: tag_name,
@@ -19,17 +19,90 @@ async function releaseExists(octokit, context, tag_name) {
 
             console.log('Release already exists.');
 
-        } catch(err) {
+        } catch(error) {
 
             if (err.status == 404 ) {
                 console.log('Release not found.');
                 return false;
             } else {
-                console.log('Error while fetching release. Error: ', err);
+                console.log('Error while fetching release. Error: ', error);
             }
         }
     }
     return true;
+}
+
+async function buildPackage() {
+
+    try {
+        const build = await exec('mvn -B package --file pom.xml');
+        console.log('build log', build)
+        return true;
+    }
+    catch(error) {
+
+        console.log('error log: ', error);
+        return false;
+    }
+}
+
+async function createRelease(octokit, context, tag_name, draft, prerelease) {
+
+    try {
+
+        const response = octokit.repos.createRelease({
+            //Params
+            ...context.repo,
+            tag_name: tag_name,
+            name: tag_name,
+            draft: draft,
+            prerelease: prerelease
+        });
+
+        console.log('Release created.');
+        return response;
+    }
+    catch(error) {
+
+        console.log('Release failed');
+        return null;
+    }
+}
+
+async function getArtifactName() {
+
+    try {
+        const artifactName = await exec('cd target/ && ls *.jar | head -1');
+        console.log('artifact log', build)
+        return artifactName;
+    }
+    catch (error) {
+
+        console.log('error log: ', error);
+        return null;
+    }
+}
+
+async function uploadReleaseAsset(octokit, context, release, artifactName) {
+
+    try{
+        const upload = await octokit.repos.uploadReleaseAsset({
+            //Params
+            ...context.repo,
+            release_id: release.id,
+            origin: release.upload_url,
+            name: artifactName,
+            data: fs.readFileSync('target/${artifactName}')
+        });
+
+        console.log('Release upload response', upload)
+        return true;
+    }
+    catch(error) {
+
+        console.log('Release upload error: ', error);
+        return false;
+    }
 }
 
 async function run(){
@@ -41,85 +114,28 @@ async function run(){
         const { context = {} } = github;
         const { pull_request, repository } = context.payload;
             
-        const releaseExist = await releaseExists(octokit, context, tag_name );
+        const isReleaseExists = await releaseExists(octokit, context, tag_name );
 
-        if (!releaseExist) {
+        if (!isReleaseExists) {
 
-            const build = await exec('mvn -B package --file pom.xml');
+            const buildCompleted = await buildPackage();
 
-            console.log('build log: ', build);
-        }
-            /*.then( (success) => {
-                
-                if (success.status == 200) {
-                    console.log("Release already exists.");
-                    return;
-                }
+            if (buildCompleted) {
 
-            }, (failure) => {
-                
+                const release = await createRelease(octokit, context, tag_name, false, true)
 
-                console.log("Building the project..."); 
+                if (release) {
 
-                exec('mvn -B package --file pom.xml', (error, stdout, stderr) => {
+                    const artifactName = await getArtifactName();
 
-                    if (error) {
-                        console.error(`exec error: ${error}`);
-                        //exec('exit 1');
-                        return;
+                    if (artifactName) {
+
+                        const uploadAssetResp = await uploadReleaseAsset(octokit, context, release, artifactName);
                     }
-
-                    console.log(`stdout: ${stdout}`);
-                    console.error(`stderr: ${stderr}`);
-                    console.log("creating new release...");
-
-                    octokit.repos.createRelease({
-                        //Params
-                        ...context.repo,
-                        tag_name: tag_name,
-                        name: tag_name,
-                        draft: false,
-                        prerelease: true
-
-                    }).then( (success) => {
-
-                        console.log("Release created.");
-
-
-                        exec('cd target/ && ls *.jar | head -1', (error, stdout, stderr) => {
-
-                            if (error) {
-                                console.error(`exec error: ${error}`);
-                                //exec('exit 1');
-                                return;
-                            }
-                            console.log(`stdout: ${stdout}`);
-                            console.error(`stderr: ${stderr}`);
-                            artifactName = stdout;
-
-                            octokit.repos.uploadReleaseAsset({
-                                //Params
-                                ...context.repo,
-                                release_id: success.data.id,
-                                origin: success.data.upload_url,
-                                name: artifactName,
-                                data: fs.readFileSync('target/${artifactName}')
-                            });
-                        });
-
-                    }, (failure) => {
-
-                        console.log("Release failed. ");
-                        return;
-                    });
-                });
-
-            });
-         
-            //- name: GEt jar file in an env variable.
-            //run: echo "artifactName=$(cd target/ && ls *.jar | head -1)"  >> $GITHUB_ENV
+                }
+            }
         }
-*/
+
     console.log("Action end");
 }
 
