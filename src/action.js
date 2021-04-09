@@ -130,7 +130,7 @@ function parseJSON(string) {
     }
     catch (error) {
 
-        console.error("Invalid Input for 'apps_data'.")
+        console.error("Invalid Input for deployment args. error: ", error);
         return null;
     }
 }

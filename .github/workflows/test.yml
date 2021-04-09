@@ -11,5 +11,5 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          tag_name: v20
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          deployment_args: '{ "release_tag": "1.25.0", "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
