@@ -7101,7 +7101,6 @@ async function releaseExists(octokit, context, tag_name) {
         } catch(error) {
 
             if (error.status == 404 ) {
-                console.log('Release not found.');
                 return false;
             } else {
                 console.log('Error while fetching release. Error: ', error);
@@ -7114,6 +7113,7 @@ async function releaseExists(octokit, context, tag_name) {
 async function buildPackage() {
 
     try {
+        console.log("Building project...")
         const build = await exec('mvn -B package --file pom.xml');
         console.log('build log', build.stdout)
         return true;
@@ -7151,10 +7151,10 @@ async function createRelease(octokit, context, tag_name, draft, prerelease) {
 async function getArtifactName() {
 
     try {
-        var artifactName = await exec('cd target/ && ls *.jar | head -1');
-        artifactName = artifactName.stdout.replace(/\r?\n|\r/g, "");
-        console.log('artifact name: ', artifactName)
-        return artifactName;
+        var asset_name = await exec('cd target/ && ls *.jar | head -1');
+        asset_name = asset_name.stdout.replace(/\r?\n|\r/g, "");
+        console.log('artifact name: ', asset_name)
+        return asset_name;
     }
     catch (error) {
 
@@ -7163,7 +7163,7 @@ async function getArtifactName() {
     }
 }
 
-async function uploadReleaseAsset(octokit, context, release, artifactName) {
+async function uploadReleaseAsset(octokit, context, release, asset_name) {
 
     try{
         const upload = await octokit.repos.uploadReleaseAsset({
@@ -7171,16 +7171,16 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
             ...context.repo,
             release_id: release.id,
             origin: release.upload_url,
-            name: artifactName,
-            data: fs.readFileSync('target/' + artifactName)
+            name: asset_name,
+            data: fs.readFileSync('target/' + asset_name)
         });
 
-        console.log('Release upload response')
+        console.log('Release asset uploaded.');
         return true;
     }
     catch(error) {
 
-        console.log('Release upload error: ', error);
+        console.log('Release asset upload error: ', error);
         return false;
     }
 }
@@ -7190,7 +7190,7 @@ async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact)
     try {
         const cmd = "anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + env + " runtime-mgr cloudhub-application modify " + app + " target/" + artifact;
         const exe = await exec(cmd);
-        console.log('Upload jar log: ', exe);
+        console.log('Cloudhub application modified.');
         return true;
     }
     catch(error) {
@@ -7217,45 +7217,40 @@ function parseJSON(string) {
 
 async function run(){
 
-        const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
-        const tag_name = core.getInput('tag_name');
-        //const app_name = core.getInput('app_name');
-        const client_id = core.getInput('client_id');
-        const client_secret = core.getInput('client_secret');
-        //const env = core.getInput('env');
-        const json_apps_data = parseJSON(core.getInput('apps_data'));
+        const github_token = core.getInput('github_token');
+        const args = parseJSON(core.getInput('deployment_args'));
 
-        if(!json_apps_data){
+        if(!args){
             return;
         }
 
-        const octokit = github.getOctokit(GITHUB_TOKEN);
+        const octokit = github.getOctokit(github_token);
         const { context = {} } = github;
-        const { pull_request, repository } = context.payload;
-            
-        const isReleaseExists = await releaseExists(octokit, context, tag_name );
+        const { client_id, client_secret }  = args.cloudhub_creds;
 
-        if (!isReleaseExists) {
+        const is_release_exists = await releaseExists(octokit, context, args.release_tag);
 
-            const buildCompleted = await buildPackage();
+        if (!is_release_exists) {
 
-            if (buildCompleted) {
+            const is_project_build = await buildPackage();
 
-                const release = await createRelease(octokit, context, tag_name, false, true)
+            if (is_project_build) {
+
+                const release = await createRelease(octokit, context, args.release_tag, false, true)
 
                 if (release) {
 
-                    const artifactName = await getArtifactName();
+                    const artifact_name = await getArtifactName();
 
-                    if (artifactName) {
+                    if (artifact_name) {
 
-                        const uploadAssetResp = await uploadReleaseAsset(octokit, context, release, artifactName);
+                        const asset = await uploadReleaseAsset(octokit, context, release, artifact_name);
 
-                        if (uploadAssetResp) {                      
+                        if (asset) {                      
 
-                            json_apps_data.forEach(app => {
+                            args.cloudhub_apps.forEach(app => {
                                 
-                                uploadJarToAnypoint(client_id, client_secret, app.env, app.name, artifactName);
+                                uploadJarToAnypoint(client_id, client_secret, app.env, app.name, artifact_name);
                             });
 
                             
