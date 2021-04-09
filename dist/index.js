@@ -7188,9 +7188,7 @@ async function uploadReleaseAsset(octokit, context, release, artifactName) {
 async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact) {
 
     try {
-        const install = await exec("npm install -g anypoint-cli@3.4.3");
-        const cmd = "anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + env + " runtime-mgr cloudhub-application modify " + app + " target/" + artifact;
-        console.log("cmd: ", cmd);
+        const cmd = "anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + env + " runtime-mgr cloudhub-application modify " + app + " target/" + artifact;
         const exe = await exec(cmd);
         console.log('Upload jar log: ', exe);
         return true;
@@ -7202,15 +7200,34 @@ async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact)
     }
 }
 
+function parseJSON(string) {
+
+    try {
+
+        var json = JSON.parse(string);
+        return json;
+
+    }
+    catch (error) {
+
+        console.error("Invalid Input for 'apps_data'.")
+        return null;
+    }
+}
+
 async function run(){
 
         const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
         const tag_name = core.getInput('tag_name');
-        const app_name = core.getInput('app_name');
+        //const app_name = core.getInput('app_name');
         const client_id = core.getInput('client_id');
         const client_secret = core.getInput('client_secret');
-        const env = core.getInput('env');
+        //const env = core.getInput('env');
+        const json_apps_data = parseJSON(core.getInput('apps_data'));
 
+        if(!json_apps_data){
+            return;
+        }
 
         const octokit = github.getOctokit(GITHUB_TOKEN);
         const { context = {} } = github;
@@ -7234,12 +7251,14 @@ async function run(){
 
                         const uploadAssetResp = await uploadReleaseAsset(octokit, context, release, artifactName);
 
-                        if (uploadAssetResp && client_id && client_secret && env) {
+                        if (uploadAssetResp) {                      
 
-                            const splits = app_name.split("-");
-                            const app = "my-" + splits[1] + "-sandbox-api";
+                            json_apps_data.forEach(app => {
+                                
+                                uploadJarToAnypoint(client_id, client_secret, app.env, app.name, artifactName);
+                            });
 
-                            const uploadToAnypoint = await uploadJarToAnypoint(client_id, client_secret, env, app, artifactName);
+                            
                         }
                     }
                 }

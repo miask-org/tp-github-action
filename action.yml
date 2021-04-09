@@ -9,18 +9,22 @@ inputs:
   tag_name:
     description: 'Release tag name'
     required: false
-  app_name:
-    description: 'Application name'
-    required: false
+  #app_name:
+  #  description: 'Application name'
+  #  required: false
   client_id:
     description: 'client id'
     required: false
   client_secret:
     description: 'client secret'
     required: false
-  env:
-    description: 'environment'
+  #env:
+  #  description: 'environment'
+  #  required: false
+  apps_data:
+    description: 'Format: [ { "env": "{your-environment}", "name": "{your-app-name}"} ]'
     required: false
+    default: "[]"
 
 runs:
   using: 'node12'
