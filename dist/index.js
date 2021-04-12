@@ -5929,6 +5929,7 @@ async function main() {
   }
   catch (error) {
     console.error(error);
+    exec('exit 1');
     return;
   }
 }
@@ -5988,7 +5989,7 @@ async function uploadReleaseAsset(octokit, context, release) {
 
 async function uploadToCloudHub() {   
   const {client_id, client_secret} = deployArgs.cloudhub_creds;
-  
+
   for (const app of deployArgs.cloudhub_apps) {   
     await exec("anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
     console.log(app.env + " updated successfully.");
@@ -6011,6 +6012,7 @@ function parseJSON(string) {
   }
   catch (error) {
     console.error(error);
+    exec('exit 1');
   }
   return null;
 }
