@@ -5916,7 +5916,7 @@ async function main() {
 
   try {
     if (await releaseExists(octokit, context)) {
-      console.log("Cancelling the subsequent step(s). " + buildArgs.release_tag + " already exists!");
+        core.setFailed("Cancelling the subsequent step(s). " + buildArgs.release_tag + " already exists!")
       return;
     }
     if (await buildPackage()) {
@@ -5991,7 +5991,7 @@ async function uploadToCloudHub() {
   const {client_id, client_secret} = deployArgs.cloudhub_creds;
 
   for (const app of deployArgs.cloudhub_apps) {   
-    await exec("anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
+    await exec("anypoint-cli --client_id=" + client_id + " --client_secret=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
     console.log(app.env + " updated successfully.");
   };
   return true;
@@ -6012,6 +6012,7 @@ function parseJSON(string) {
   }
   catch (error) {
     console.error(error);
+    core.setFailed(error.message)
   }
   return null;
 }

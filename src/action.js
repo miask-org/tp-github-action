@@ -22,7 +22,7 @@ async function main() {
 
   try {
     if (await releaseExists(octokit, context)) {
-      console.log("Cancelling the subsequent step(s). " + buildArgs.release_tag + " already exists!");
+        core.setFailed("Cancelling the subsequent step(s). " + buildArgs.release_tag + " already exists!")
       return;
     }
     if (await buildPackage()) {
