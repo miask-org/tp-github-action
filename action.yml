@@ -3,10 +3,14 @@ description: 'Say "Thank You" to new pull requests'
 author: 'Muzammal Nazir'
 
 inputs:
-  github_token:
+  GITHUB_TOKEN:
     description: 'GitHub token'
     required: true
-  deployment_args:
+  buildArgs:
+    description: 'Json object'
+    required: false
+    default: "{}"
+  deployArgs:
     description: 'Json object'
     required: false
     default: "{}"

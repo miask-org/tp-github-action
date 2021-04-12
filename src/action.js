@@ -1,187 +1,122 @@
 const core = require('@actions/core');
 const github = require('@actions/github');
-const exe = require('@actions/exec');
+const cp = require('child_process');
 const util = require('util');
-const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
+const exec = util.promisify(cp.exec);
 
-async function releaseExists(octokit, context, tag_name) {
 
-    if (tag_name != null || tag_name != '') {
+let artifactInfo = {};
+let buildArgs = {};
+let deployArgs = {};
 
-        try {
-            await octokit.repos.getReleaseByTag({
-                //Params
-                ...context.repo,
-                tag: tag_name,
-            });
+async function main() {
+  const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
+  buildArgs = parseJSON(core.getInput('buildArgs'));
+  deployArgs = parseJSON(core.getInput('deployArgs'));
 
-            console.log('Release already exists.');
+  if (!deployArgs || !buildArgs) return;
 
-        } catch(error) {
+  const octokit = github.getOctokit(GITHUB_TOKEN);
+  const { context = {} } = github;
 
-            if (error.status == 404 ) {
-                return false;
-            } else {
-                console.log('Error while fetching release. Error: ', error);
-            }
-        }
+  try {
+    if (await releaseExists(octokit, context)) {
+      console.log("Cancelling the subsequent step(s). ${buildArgs.release_tag} already exists!");
+      return;
     }
+    if (await buildPackage()) {
+      if (await createRelease(octokit, context)) {
+        await uploadToCloudHub();
+      }
+    }
+    console.log("action executed successfully.");
     return true;
+  }
+  catch (error) {
+    console.error(error);
+    return;
+  }
+}
+
+main();
+
+
+async function releaseExists(octokit, context) {
+  if (buildArgs.release_tag) {
+    try {
+      await octokit.repos.getReleaseByTag({
+        ...context.repo,
+        tag: buildArgs.release_tag
+      });
+      console.log("Release exist!");
+    }
+    catch (error) {
+      console.error(error);
+      if (error.status == 404) return false;
+    }
+  }
+  return true;
 }
 
 async function buildPackage() {
-
-    try {
-        console.log("Building project...")
-        const build = await exec('mvn -B package --file pom.xml');
-        console.log('build log', build.stdout)
-        return true;
-    }
-    catch(error) {
-
-        console.log('error log: ', error.stderr);
-        return false;
-    }
+  console.log("Building project artifact ...");
+  const build = await exec('mvn -B package --file pom.xml');
+  console.log('Build logs ', build.stdout);
+  return true;
 }
 
-async function createRelease(octokit, context, tag_name, draft, prerelease) {
+async function createRelease(octokit, context) {
+  const response = await octokit.repos.createRelease({
+    ...context.repo,
+    tag_name: buildArgs.release_tag,
+    name: "Release " + buildArgs.release_tag,
+    draft: false,
+    prerelease: true
+  });
 
-    try {
-
-        const response = await octokit.repos.createRelease({
-            //Params
-            ...context.repo,
-            tag_name: tag_name,
-            name: tag_name,
-            draft: draft,
-            prerelease: prerelease
-        });
-
-        console.log('Release created.');
-        return response.data;
-    }
-    catch(error) {
-
-        console.log('Release failed');
-        return null;
-    }
+  console.log('Create release logs ', response.stdout);
+  return await uploadReleaseAsset(octokit, context, response.data);
 }
 
-async function getArtifactName() {
+async function uploadReleaseAsset(octokit, context, release) {
+  artifactInfo = parseJSON(await getArtifactInfo());
 
-    try {
-        var asset_name = await exec('cd target/ && ls *.jar | head -1');
-        asset_name = asset_name.stdout.replace(/\r?\n|\r/g, "");
-        console.log('artifact name: ', asset_name)
-        return asset_name;
-    }
-    catch (error) {
-
-        console.log('error log: ', error.stderr);
-        return null;
-    }
+    await octokit.repos.uploadReleaseAsset({
+      ...context.repo,
+      release_id: release.id,
+      origin: release.upload_url,
+      name: artifactInfo.name,
+      data: fs.readFileSync(artifactInfo.path)
+    });
+    return true;
 }
 
-async function uploadReleaseAsset(octokit, context, release, asset_name) {
-
-    try{
-        const upload = await octokit.repos.uploadReleaseAsset({
-            //Params
-            ...context.repo,
-            release_id: release.id,
-            origin: release.upload_url,
-            name: asset_name,
-            data: fs.readFileSync('target/' + asset_name)
-        });
-
-        console.log('Release asset uploaded.');
-        return true;
-    }
-    catch(error) {
-
-        console.log('Release asset upload error: ', error);
-        return false;
-    }
+async function uploadToCloudHub() {   
+  for (const app of deployArgs.cloudhub_apps) {
+    const {client_id, client_secret} = deployArgs.cloudhub_creds;
+    await exec("anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app + " " + artifactInfo.path);
+    console.log(app.env + " updated successfully.");
+  };
+  return true;
 }
 
-async function uploadJarToAnypoint(client_id, client_secret, env, app, artifact) {
-
-    try {
-        const cmd = "anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + env + " runtime-mgr cloudhub-application modify " + app + " target/" + artifact;
-        const exe = await exec(cmd);
-        console.log('Cloudhub application modified.');
-        return true;
-    }
-    catch(error) {
-
-        console.log('Upload jar error: ', error);
-        return false;
-    }
+async function getArtifactInfo() {
+  var asset_name = await exec('cd target/ && ls *.jar | head -1');
+  asset_name = asset_name.stdout.replace(/\r?\n|\r/g, "");
+  const artifactInfo = JSON.stringify({ name: asset_name, path: "target/" + asset_name });
+  console.log('Artifact Info: ', artifactInfo);
+  return artifactInfo;
 }
 
 function parseJSON(string) {
-
-    try {
-
-        var json = JSON.parse(string);
-        return json;
-
-    }
-    catch (error) {
-
-        console.error("Invalid Input for deployment args. error: ", error);
-        return null;
-    }
+  try {
+    var json = JSON.parse(string);
+    return json;
+  }
+  catch (error) {
+    console.error(error);
+  }
+  return null;
 }
-
-async function run(){
-
-        const github_token = core.getInput('github_token');
-        const args = parseJSON(core.getInput('deployment_args'));
-
-        if(!args){
-            return;
-        }
-
-        const octokit = github.getOctokit(github_token);
-        const { context = {} } = github;
-        const { client_id, client_secret }  = args.cloudhub_creds;
-
-        const is_release_exists = await releaseExists(octokit, context, args.release_tag);
-
-        if (!is_release_exists) {
-
-            const is_project_build = await buildPackage();
-
-            if (is_project_build) {
-
-                const release = await createRelease(octokit, context, args.release_tag, false, true)
-
-                if (release) {
-
-                    const artifact_name = await getArtifactName();
-
-                    if (artifact_name) {
-
-                        const asset = await uploadReleaseAsset(octokit, context, release, artifact_name);
-
-                        if (asset) {                      
-
-                            args.cloudhub_apps.forEach(app => {
-                                
-                                uploadJarToAnypoint(client_id, client_secret, app.env, app.name, artifact_name);
-                            });
-
-                            
-                        }
-                    }
-                }
-            }
-        }
-
-    console.log("Action end");
-}
-
-run();
 

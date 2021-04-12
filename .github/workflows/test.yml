@@ -12,4 +12,5 @@ jobs:
       - uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          deployment_args: '{ "release_tag": "1.25.0", "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
+          buildArgs: '{ "release_tag": "1.25.0" }'
+          deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
