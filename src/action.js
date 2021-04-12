@@ -35,7 +35,7 @@ async function main() {
   }
   catch (error) {
     console.error(error);
-    exec('exit 1');
+    await exec('exit 1');
     return;
   }
 }
