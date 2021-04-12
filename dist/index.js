@@ -5929,7 +5929,7 @@ async function main() {
   }
   catch (error) {
     console.error(error);
-    nonZeroExit();
+    core.setFailed(error.message)
     return;
   }
 }
@@ -6012,20 +6012,8 @@ function parseJSON(string) {
   }
   catch (error) {
     console.error(error);
-    nonZeroExit();
   }
   return null;
-}
-
-async function nonZeroExit() {
-
-    try {
-        console.log('Existing with non-zero code.')
-        await exec('exit 1');
-    }
-    catch(error) {
-        console.error(error);
-    }
 }
 
 /***/ }),
