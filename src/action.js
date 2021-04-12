@@ -35,7 +35,7 @@ async function main() {
   }
   catch (error) {
     console.error(error);
-    await exec('exit 1');
+    nonZeroExit();
     return;
   }
 }
@@ -118,8 +118,18 @@ function parseJSON(string) {
   }
   catch (error) {
     console.error(error);
-    exec('exit 1');
+    nonZeroExit();
   }
   return null;
 }
 
+async function nonZeroExit() {
+
+    try {
+        console.log('Existing with non-zero code.')
+        await exec('exit 1');
+    }
+    catch(error) {
+        console.error(error);
+    }
+}
