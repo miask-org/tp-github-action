@@ -118,6 +118,7 @@ function parseJSON(string) {
   }
   catch (error) {
     console.error(error);
+    core.setFailed(error.message)
   }
   return null;
 }
