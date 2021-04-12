@@ -52,8 +52,8 @@ async function releaseExists(octokit, context) {
       console.log("Release exist!");
     }
     catch (error) {
-      console.error(error);
       if (error.status == 404) return false;
+      else throw error;
     }
   }
   return true;
