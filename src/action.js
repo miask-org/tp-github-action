@@ -75,7 +75,7 @@ async function createRelease(octokit, context) {
     prerelease: true
   });
 
-  console.log('Create release logs ', response.stdout);
+  console.log('Release '+ buildArgs.release_tag +' created.');
   return await uploadReleaseAsset(octokit, context, response.data);
 }
 
@@ -95,7 +95,7 @@ async function uploadReleaseAsset(octokit, context, release) {
 async function uploadToCloudHub() {   
   for (const app of deployArgs.cloudhub_apps) {
     const {client_id, client_secret} = deployArgs.cloudhub_creds;
-    await exec("anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app + " " + artifactInfo.path);
+    await exec("anypoint-cli --username=" + client_id + " --password=" + client_secret + " --environment=" + app.env + " runtime-mgr cloudhub-application modify " + app.name + " " + artifactInfo.path);
     console.log(app.env + " updated successfully.");
   };
   return true;
