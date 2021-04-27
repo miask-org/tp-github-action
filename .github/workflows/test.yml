@@ -9,8 +9,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      
+      - name: cutom-action
+        uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          buildArgs: '{ "release_tag": "v18" }'
-          deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
+          #buildArgs: '{ "release_tag": "v18" }'
+          #deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
+        
+      - name: output
+        run: echo ${{steps.cutom-action.output.issue_number}}
+        
