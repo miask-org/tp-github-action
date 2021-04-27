@@ -10,7 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: cutom_action
+      - name: cutom action
+        id: custom_action
         uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
@@ -18,5 +19,5 @@ jobs:
           #deployArgs: '{ "cloudhub_creds": { "client_id": "${{secrets.CLIENT_ID}}", "client_secret": "${{secrets.CLIENT_SECRET}}" }, "cloudhub_apps": [ {"env": "Sandbox", "name": "my-transformation-sandbox-api" }, {"env": "Sandbox", "name": "tp-transformation-api" } ] }'
         
       - name: output
-        run: echo ${{steps.cutom_action.outputs.issue_number}}
+        run: echo ${{steps.custom_action.outputs.issue_number}}
         
