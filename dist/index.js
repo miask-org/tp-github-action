@@ -5898,6 +5898,7 @@ const cp = __nccwpck_require__(129);
 const util = __nccwpck_require__(669);
 const fs = __nccwpck_require__(747);
 const exec = util.promisify(cp.exec);
+var parser = __nccwpck_require__(996);
 
 async function main(){
     const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
@@ -5905,7 +5906,12 @@ async function main(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
     const { context = {} } = github;
 
-    core.setOutput('issue_number', '1')
+    core.setOutput('issue_number', '1');
+
+    fs.readFile( './pom.xml', function(err, data) {
+        var json = parser.toJson(data);
+        console.log("to json ->", json);
+     });
 }
 
 main();
@@ -5916,6 +5922,14 @@ main();
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
+
+
+/***/ }),
+
+/***/ 996:
+/***/ ((module) => {
+
+module.exports = eval("require")("xml2json");
 
 
 /***/ }),
