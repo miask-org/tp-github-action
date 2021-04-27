@@ -12485,7 +12485,7 @@ async function main(){
 
     try {
     const pom = await parser.parseStringPromise(xml_data);
-    core.setOutput("release_number", console.log(pom.project.version));
+    core.setOutput("release_number", pom.project.version);
     }
     catch(error){
         console.error(error);
