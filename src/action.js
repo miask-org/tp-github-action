@@ -3,9 +3,8 @@ const github = require('@actions/github');
 const cp = require('child_process');
 const util = require('util');
 const exec = util.promisify(cp.exec);
-const xml2js = require('xml2js');
+const parser = require('xml2js');
 const fs = require('fs');
-const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function main(){
     const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
@@ -13,17 +12,15 @@ async function main(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
     const { context = {} } = github;
 
-    let xml_string = fs.readFileSync("./pom.xml", "utf8");
+    let xml_data = fs.readFileSync("./pom.xml", "utf8");
 
-    const pom = parser.parseString(xml_string, function(error, result) {
-        if(error === null) {
-            console.log(result);
-            core.setOutput('release_number', result.project.version);
-        }
-        else {
-            console.log(error);
-        }
-    });
+    try {
+    const pom = await parser.parseStringPromise(xml_data);
+    core.setOutput("release_number", console.log(pom.project.version));
+    }
+    catch(error){
+        console.error(error);
+    } 
 }
 
 main();

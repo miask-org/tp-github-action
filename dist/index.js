@@ -12472,9 +12472,8 @@ const github = __nccwpck_require__(5438);
 const cp = __nccwpck_require__(3129);
 const util = __nccwpck_require__(1669);
 const exec = util.promisify(cp.exec);
-const xml2js = __nccwpck_require__(6189);
+const parser = __nccwpck_require__(6189);
 const fs = __nccwpck_require__(5747);
-const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function main(){
     const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
@@ -12482,17 +12481,15 @@ async function main(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
     const { context = {} } = github;
 
-    let xml_string = fs.readFileSync("./pom.xml", "utf8");
+    let xml_data = fs.readFileSync("./pom.xml", "utf8");
 
-    const pom = parser.parseString(xml_string, function(error, result) {
-        if(error === null) {
-            console.log(result);
-            core.setOutput('release_number', result.project.version);
-        }
-        else {
-            console.log(error);
-        }
-    });
+    try {
+    const pom = await parser.parseStringPromise(xml_data);
+    core.setOutput("release_number", console.log(pom.project.version));
+    }
+    catch(error){
+        console.error(error);
+    } 
 }
 
 main();
