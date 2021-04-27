@@ -2,9 +2,10 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const cp = require('child_process');
 const util = require('util');
-const fs = require('fs');
 const exec = util.promisify(cp.exec);
-var parser = require('xml2json');
+const xml2js = require('xml2js');
+const fs = require('fs');
+const parser = new xml2js.Parser({ attrkey: "ATTR" });
 
 async function main(){
     const GITHUB_TOKEN = core.getInput('GITHUB_TOKEN');
@@ -14,10 +15,16 @@ async function main(){
 
     core.setOutput('issue_number', '1');
 
-    fs.readFile( './pom.xml', function(err, data) {
-        var json = parser.toJson(data);
-        console.log("to json ->", json);
-     });
+    let xml_string = fs.readFileSync("./pom.xml", "utf8");
+
+    parser.parseString(xml_string, function(error, result) {
+        if(error === null) {
+            console.log(result);
+        }
+        else {
+            console.log(error);
+        }
+    });
 }
 
 main();
