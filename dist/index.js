@@ -12484,15 +12484,13 @@ async function main(){
 
     let xml_string = fs.readFileSync("./pom.xml", "utf8");
 
-    parser.parseString(xml_string, function(error, result) {
-        if(error === null) {
-            console.log(result);
-            core.setOutput('issue_number', result.project.version);
-        }
-        else {
-            console.log(error);
-        }
-    });
+    try {
+    const pom = parser.parseString(xml_string);
+    core.setOutput("Release", pom.project.version);
+    }
+    catch(err){
+        console.error(err);
+    }
 }
 
 main();
