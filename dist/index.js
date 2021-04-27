@@ -12482,13 +12482,12 @@ async function main(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
     const { context = {} } = github;
 
-    core.setOutput('issue_number', '1');
-
     let xml_string = fs.readFileSync("./pom.xml", "utf8");
 
     parser.parseString(xml_string, function(error, result) {
         if(error === null) {
             console.log(result);
+            core.setOutput('issue_number', result.project.version);
         }
         else {
             console.log(error);
