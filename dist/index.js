@@ -12487,7 +12487,7 @@ async function main(){
     const pom = parser.parseString(xml_string, function(error, result) {
         if(error === null) {
             console.log(result);
-            core.setOutput('issue_number', result.project.version);
+            core.setOutput('release_number', result.project.version);
         }
         else {
             console.log(error);
