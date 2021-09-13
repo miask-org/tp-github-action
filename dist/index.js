@@ -12481,11 +12481,13 @@ async function main(){
     const octokit = github.getOctokit(GITHUB_TOKEN);
     const { context = {} } = github;
 
-    let xml_data = fs.readFileSync("./pom.xml", "utf8");
+    //let xml_data = fs.readFileSync("./pom.xml", "utf8");
 
     try {
-    const pom = await parser.parseStringPromise(xml_data);
-    core.setOutput("release_number", pom.project.version);
+    //const pom = await parser.parseStringPromise(xml_data);
+    //core.setOutput("release_number", pom.project.version);
+    console.log(context);
+    console.log(context.repo);
     }
     catch(error){
         console.error(error);
