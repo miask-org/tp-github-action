@@ -12486,8 +12486,8 @@ async function main(){
     try {
     //const pom = await parser.parseStringPromise(xml_data);
     //core.setOutput("release_number", pom.project.version);
-    console.log(context);
-    console.log(context.repo);
+    //console.log(context);
+    console.log(`Repo name: ${context.repo.repo}`);
     }
     catch(error){
         console.error(error);
